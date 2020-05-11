@@ -2,20 +2,17 @@
   "schemaVersion": 1,
   "id": "fabricndi",
   "version": "${version}",
-
   "name": "Fabric NDI",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "Adds support for NDI to minecraft",
   "authors": [
-    "Me!"
+    "Rushmead"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://github.com/Rushmead/Fabric-NDI",
+    "sources": "https://github.com/Rushmead/Fabric-NDI"
   },
-
-  "license": "CC0-1.0",
+  "license": "GNU GPLv3",
   "icon": "assets/fabricndi/icon.png",
-
   "environment": "client",
   "entrypoints": {
     "main": [
@@ -25,7 +22,6 @@
   "mixins": [
     "fabricndi.mixins.json"
   ],
-
   "depends": {
     "fabricloader": ">=0.7.4",
     "fabric": "*",

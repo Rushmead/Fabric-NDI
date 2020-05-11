@@ -2,6 +2,10 @@ plugins {
 	id 'fabric-loom' version '0.4.3'
 	id 'maven-publish'
 }
+configurations {
+	shade
+	compile.extendsFrom shade
+}
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -25,7 +29,7 @@ dependencies {
 
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
-	implementation 'com.walker:devolay:1.2.1'
+	shade 'com.walker:devolay:1.2.1'
 }
 
 processResources {
@@ -58,6 +62,11 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 
 jar {
 	from "LICENSE"
+	configurations.shade.each { dep ->
+		from(project.zipTree(dep)){
+			exclude 'META-INF', 'META-INF/**'
+		}
+	}
 }
 
 // configure the maven publication
