@@ -1,6 +1,7 @@
 package dev.imabad.fabricndi;
 
 import com.mojang.authlib.GameProfile;
+import com.walker.devolay.DevolayMetadataFrame;
 import com.walker.devolay.DevolaySender;
 import dev.imabad.fabricndi.screens.NameScreen;
 import net.minecraft.client.MinecraftClient;
@@ -8,6 +9,8 @@ import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -61,10 +64,16 @@ public class CameraEntity extends OtherClientPlayerEntity {
     }
 
     public void setName(String text){
+        if(this.name.getString().equals(text)){
+            return;
+        }
         this.name = new LiteralText(text);
         DevolaySender devolaySender = new DevolaySender("MC - " + text);
-        FabricNDI.instance.cameraControls.get(getUuid()).updateSender(devolaySender);
-        FabricNDI.instance.cameras.get(getUuid()).updateSender(devolaySender);
+        DevolayMetadataFrame metadataFrame = new DevolayMetadataFrame();
+        metadataFrame.setData("<ndi_capabilities ntk_ptz=\"true\"/>");
+        devolaySender.addConnectionMetadata(metadataFrame);
+        FabricNDI.instance.getCameraManager().cameraControls.get(getUuid()).updateSender(devolaySender);
+        FabricNDI.instance.getCameraManager().cameras.get(getUuid()).updateSender(devolaySender);
     }
 
     @Override
@@ -98,10 +107,10 @@ public class CameraEntity extends OtherClientPlayerEntity {
     @Override
     public void remove() {
         super.remove();
-        FabricNDI.instance.cameraControls.get(getUuid()).end();
-        FabricNDI.instance.cameras.get(getUuid()).end();
-        FabricNDI.instance.cameras.remove(getUuid());
-        FabricNDI.instance.cameraEntities.remove(this);
+        FabricNDI.instance.getCameraManager().cameraControls.get(getUuid()).end();
+        FabricNDI.instance.getCameraManager().cameras.get(getUuid()).end();
+        FabricNDI.instance.getCameraManager().cameras.remove(getUuid());
+        FabricNDI.instance.getCameraManager().cameraEntities.remove(this);
     }
 
 
@@ -109,5 +118,30 @@ public class CameraEntity extends OtherClientPlayerEntity {
     public boolean interact(PlayerEntity player, Hand hand) {
        MinecraftClient.getInstance().openScreen(new NameScreen(this));
        return true;
+    }
+
+    public CompoundTag getTag(){
+        CompoundTag tag = new CompoundTag();
+        tag.put("pos", this.toListTag(this.getX(), this.getY(), this.getZ()));
+        tag.put("rotation", this.toListTag(this.yaw, this.pitch));
+        tag.putString("name", this.name.asString());
+        tag.putString("uuid", this.getUuidAsString());
+        tag.putInt("zoom", this.zoom);
+        return tag;
+    }
+
+    public void cameraFromTag(CompoundTag tag){
+        ListTag pos = tag.getList("pos", 6);
+        ListTag rotation = tag.getList("rotation", 5);
+        this.resetPosition(pos.getDouble(0), pos.getDouble(1), pos.getDouble(2));
+        this.yaw = rotation.getFloat(0);
+        this.pitch = rotation.getFloat(1);
+        this.prevYaw = this.yaw;
+        this.prevPitch = this.pitch;
+        this.setHeadYaw(this.yaw);
+        this.setYaw(this.yaw);
+        this.name = new LiteralText(tag.getString("name"));
+        this.zoom = tag.getInt("zoom");
+        this.refreshPosition();
     }
 }

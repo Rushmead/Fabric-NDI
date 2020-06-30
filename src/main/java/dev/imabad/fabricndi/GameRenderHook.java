@@ -53,7 +53,7 @@ public class GameRenderHook {
         }
         if(player != null){
             List<CameraEntity> needFrames = new ArrayList<>();
-            for(CameraEntity e : FabricNDI.instance.cameraEntities){
+            for(CameraEntity e : FabricNDI.instance.getCameraManager().cameraEntities){
                 PBOManager pboManager;
                 if(!entityBuffers.containsKey(e.getUuid())){
                     pboManager = new PBOManager(window.getWidth(), window.getHeight());
@@ -67,21 +67,24 @@ public class GameRenderHook {
                     }
                 }
                 NDIThread ndiThread;
-                if(!FabricNDI.instance.cameras.containsKey(e.getUuid())){
+                if(!FabricNDI.instance.getCameraManager().cameras.containsKey(e.getUuid())){
                     DevolaySender sender = new DevolaySender("MC - " + e.getDisplayName().getString());
                     DevolayMetadataFrame metadataFrame = new DevolayMetadataFrame();
                     metadataFrame.setData("<ndi_capabilities ntk_ptz=\"true\"/>");
                     sender.addConnectionMetadata(metadataFrame);
                     ndiThread = new NDIThread(sender, pboManager.buffer, window.getWidth(), window.getHeight());
-                    FabricNDI.instance.cameras.put(e.getUuid(), ndiThread);
+                    FabricNDI.instance.getCameraManager().cameras.put(e.getUuid(), ndiThread);
                     NDIControlThread ndiControlThread = new NDIControlThread(sender, e);
-                    FabricNDI.instance.cameraControls.put(e.getUuid(), ndiControlThread);
+                    FabricNDI.instance.getCameraManager().cameraControls.put(e.getUuid(), ndiControlThread);
                     ndiThread.start();
                     ndiControlThread.start();
                 } else {
-                    ndiThread = FabricNDI.instance.cameras.get(e.getUuid());
+                    ndiThread = FabricNDI.instance.getCameraManager().cameras.get(e.getUuid());
+                    if(hasResChanged){
+                        ndiThread.updateVideoFrame(window.getWidth(), window.getHeight());
+                    }
                 }
-                if(ndiThread.getNeedsFrame().get() && ndiThread.sender.get().getConnectionCount(0) > 0) {
+                if(e.isAlive() && ndiThread.getNeedsFrame().get() && ndiThread.sender.get().getConnectionCount(0) > 0) {
                     needFrames.add(e);
                 }
             }
@@ -95,6 +98,9 @@ public class GameRenderHook {
                 Framebuffer oldWindow = minecraftClient.getFramebuffer();
 
                 for(Entity e : needFrames){
+                    if(e == null || !e.isAlive()){
+                        continue;
+                    }
                     Framebuffer entityFramebuffer;
                     if(!entityFramebuffers.containsKey(e.getUuid())){
                         entityFramebuffer = new Framebuffer(window.getWidth(), window.getHeight(), true, MinecraftClient.IS_SYSTEM_MAC);;
@@ -120,7 +126,7 @@ public class GameRenderHook {
                     minecraftClient.cameraEntity = e;
                     minecraftClient.gameRenderer.renderWorld(tickDelta, Util.getMeasuringTimeNano(), new MatrixStack());
                     entityBytes.readPixelData(entityFramebuffer);
-                    FabricNDI.instance.cameras.get(e.getUuid()).setByteBuffer(entityBytes.buffer);
+                    FabricNDI.instance.getCameraManager().cameras.get(e.getUuid()).setByteBuffer(entityBytes.buffer);
 
                     GL11.glMatrixMode(GL11.GL_PROJECTION);
                     RenderSystem.popMatrix();

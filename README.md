@@ -15,7 +15,9 @@ Also requires Fabric API.
 
 ## Under the hood
 
-Under the hood this uses the [Devolay library by WalkerKnapp](https://github.com/WalkerKnapp/devolay) which is licensed under Apache-2.0.
+Under the hood this uses the [Devolay library by WalkerKnapp](https://github.com/WalkerKnapp/devolay) which is licensed under Apache-2.0. 
+
+The mod currently depends on version 1.2.1 which does not exist, in development I use a compiled version of the latest master branch.
 
 ## License
 

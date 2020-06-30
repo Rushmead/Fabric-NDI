@@ -3,14 +3,13 @@
   "minVersion": "0.8",
   "package": "dev.imabad.fabricndi.mixin",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [
-  ],
   "client": [
-    "MinecraftClientMixin",
+    "ClientWorldMixin",
     "ClientPlayerEntityMixin",
-    "WorldRendererMixin",
     "GameRendererMixin",
-    "PlayerEntityRendererMixin"
+    "MinecraftClientMixin",
+    "PlayerEntityRendererMixin",
+    "WorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
