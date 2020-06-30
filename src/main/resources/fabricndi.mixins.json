@@ -4,6 +4,7 @@
   "package": "dev.imabad.fabricndi.mixin",
   "compatibilityLevel": "JAVA_8",
   "client": [
+    "CameraMixin",
     "ClientWorldMixin",
     "ClientPlayerEntityMixin",
     "GameRendererMixin",

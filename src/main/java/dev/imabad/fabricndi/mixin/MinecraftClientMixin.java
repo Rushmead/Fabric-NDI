@@ -44,9 +44,11 @@ public abstract class MinecraftClientMixin implements MinecraftClientExt {
 
     @Shadow public abstract ClientPlayNetworkHandler getNetworkHandler();
 
+    @Shadow private boolean paused;
+
     @Inject(method = "render(Z)V", at=@At("RETURN"))
     public void render(boolean tick, CallbackInfo info) {
-        FabricNDI.instance.getGameRenderHook().render(framebuffer, window, player, getTickDelta());
+        FabricNDI.instance.getGameRenderHook().render(framebuffer, window, player, getTickDelta(), paused);
     }
 
     @Override

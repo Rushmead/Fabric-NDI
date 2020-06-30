@@ -6,8 +6,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 
 public class NameScreen extends Screen {
 
@@ -21,22 +22,23 @@ public class NameScreen extends Screen {
 
     protected void init() {
         super.init();
-        this.minecraft.keyboard.enableRepeatEvents(true);
+        this.client.keyboard.enableRepeatEvents(true);
         int i = this.width / 2;
         int j = this.height / 2;
-        this.nameField = new TextFieldWidget(this.font, i - 75, j - 10, 150, 20, I18n.translate("container.repair"));
+        this.nameField = new TextFieldWidget(this.textRenderer, i - 75, j - 10, 150, 20, new TranslatableText("container.repair"));
         this.nameField.setText(cameraEntity.getDisplayName().asString());
+        this.nameField.setSelected(true);
         this.nameField.setFocusUnlocked(false);
         this.nameField.changeFocus(true);
         this.nameField.setMaxLength(35);
         this.children.add(this.nameField);
         this.setInitialFocus(this.nameField);
-        this.addButton(new ButtonWidget(i - 20, j + 20, 40, 20, "Delete", this::buttonClick));
+        this.addButton(new ButtonWidget(i - 20, j + 20, 40, 20, new LiteralText("Delete"), this::buttonClick));
     }
 
     public void buttonClick(ButtonWidget buttonWidget){
         this.cameraEntity.remove();
-        this.minecraft.player.closeScreen();
+        this.client.player.closeScreen();
     }
 
     public void resize(MinecraftClient client, int width, int height) {
@@ -47,7 +49,7 @@ public class NameScreen extends Screen {
 
     public void removed() {
         super.removed();
-        this.minecraft.keyboard.enableRepeatEvents(false);
+        this.client.keyboard.enableRepeatEvents(false);
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
@@ -56,17 +58,19 @@ public class NameScreen extends Screen {
                 String string = this.nameField.getText();
                 cameraEntity.setName(string);
             }
-            this.minecraft.player.closeScreen();
+            this.client.player.closeScreen();
         }
 
         return !this.nameField.keyPressed(keyCode, scanCode, modifiers) && !this.nameField.isActive() ? super.keyPressed(keyCode, scanCode, modifiers) : true;
     }
 
-    public void render(int mouseX, int mouseY, float delta) {
-        this.renderBackground();
-        super.render(mouseX, mouseY, delta);
+    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float delta) {
+        this.renderBackground(matrixStack);
+        super.render(matrixStack, mouseX, mouseY, delta);
         RenderSystem.disableBlend();
-        this.nameField.render(mouseX, mouseY, delta);
-        this.font.draw(this.title.asFormattedString(), (this.width / 2) - (this.font.getStringWidth(this.title.asFormattedString()) / 2), (this.height / 2) - 30, 0xffffff);
+        this.nameField.render(matrixStack, mouseX, mouseY, delta);
+        this.textRenderer.draw(matrixStack, this.title.asString(), (this.width / 2) - (this.textRenderer.getWidth(this.title.getString()) / 2), (this.height / 2) - 30, 0xffffff);
     }
+
+
 }

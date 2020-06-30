@@ -7,12 +7,14 @@ import dev.imabad.fabricndi.screens.NameScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 
@@ -113,11 +115,16 @@ public class CameraEntity extends OtherClientPlayerEntity {
         FabricNDI.instance.getCameraManager().cameraEntities.remove(this);
     }
 
+    @Override
+    public ActionResult interact(PlayerEntity player, Hand hand) {
+        MinecraftClient.getInstance().openScreen(new NameScreen(this));
+        return super.interact(player, hand);
+    }
 
     @Override
-    public boolean interact(PlayerEntity player, Hand hand) {
-       MinecraftClient.getInstance().openScreen(new NameScreen(this));
-       return true;
+    public ActionResult interact(Entity entity, Hand hand) {
+        MinecraftClient.getInstance().openScreen(new NameScreen(this));
+        return ActionResult.SUCCESS;
     }
 
     public CompoundTag getTag(){

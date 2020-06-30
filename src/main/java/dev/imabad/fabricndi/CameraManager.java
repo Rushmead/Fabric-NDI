@@ -10,6 +10,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.util.WorldSavePath;
 import net.minecraft.world.level.storage.LevelStorage;
 
 import java.io.File;
@@ -53,8 +54,7 @@ public class CameraManager {
             ip = ip.substring(0, ip.indexOf(":"));
             saveFile = new File(serversFolder, ip + ".dat");
         } else {
-            File worldFolder = new File(levelStorage.getSavesDirectory().toFile(), server.getLevelName());
-            saveFile = new File(worldFolder, "cameras.dat");
+            saveFile = new File(server.getSavePath(WorldSavePath.ROOT).toFile(), "cameras.dat");
         }
         try {
             NbtIo.writeCompressed(allEntities, new FileOutputStream(saveFile));
@@ -74,8 +74,7 @@ public class CameraManager {
                 saveFile = new File(serversFolder, ip + ".dat");
             }
         } else if (server != null){
-            File worldFolder = new File(levelStorage.getSavesDirectory().toFile(), server.getLevelName());
-            saveFile = new File(worldFolder, "cameras.dat");
+            saveFile = new File(server.getSavePath(WorldSavePath.ROOT).toFile(), "cameras.dat");
         }
         CompoundTag compoundTag = null;
 

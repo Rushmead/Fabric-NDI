@@ -32,7 +32,7 @@ public class GameRenderHook {
         mainSender = new DevolaySender(senderName);
     }
 
-    public void render(Framebuffer framebuffer, Window window, PlayerEntity player, float tickDelta){
+    public void render(Framebuffer framebuffer, Window window, PlayerEntity player, float tickDelta, boolean isPaused){
         boolean hasResChanged = false;
         if(mainOutput == null){
             pboManager = new PBOManager(window.getWidth(), window.getHeight());
@@ -51,7 +51,7 @@ public class GameRenderHook {
                 mainOutput.setByteBuffer(pboManager.buffer);
             }
         }
-        if(player != null){
+        if(player != null && !isPaused){
             List<CameraEntity> needFrames = new ArrayList<>();
             for(CameraEntity e : FabricNDI.instance.getCameraManager().cameraEntities){
                 PBOManager pboManager;
@@ -96,6 +96,7 @@ public class GameRenderHook {
                 minecraftClient.options.hudHidden = true;
                 minecraftClient.options.perspective = 0;
                 Framebuffer oldWindow = minecraftClient.getFramebuffer();
+                float prevCameraY = CameraExt.from(minecraftClient.gameRenderer.getCamera()).getCameraY();
 
                 for(Entity e : needFrames){
                     if(e == null || !e.isAlive()){
@@ -124,9 +125,13 @@ public class GameRenderHook {
 
                     PBOManager entityBytes = entityBuffers.get(e.getUuid());;
                     minecraftClient.cameraEntity = e;
+                    CameraExt.from(minecraftClient.gameRenderer.getCamera()).setCameraY(e.getStandingEyeHeight());
+//                    minecraftClient.gameRenderer.getCamera().updateEyeHeight();
                     minecraftClient.gameRenderer.renderWorld(tickDelta, Util.getMeasuringTimeNano(), new MatrixStack());
+//                    minecraftClient.gameRenderer.getCamera().updateEyeHeight();
                     entityBytes.readPixelData(entityFramebuffer);
                     FabricNDI.instance.getCameraManager().cameras.get(e.getUuid()).setByteBuffer(entityBytes.buffer);
+                    CameraExt.from(minecraftClient.gameRenderer.getCamera()).setCameraY(prevCameraY);
 
                     GL11.glMatrixMode(GL11.GL_PROJECTION);
                     RenderSystem.popMatrix();
@@ -138,7 +143,7 @@ public class GameRenderHook {
                 oldWindow.beginWrite(true);
 
                 minecraftClient.cameraEntity = oldCam;
-                minecraftClient.gameRenderer.getCamera().updateEyeHeight();
+//                minecraftClient.gameRenderer.getCamera().updateEyeHeight();
                 minecraftClient.options.hudHidden = oldHudHidden;
                 minecraftClient.options.perspective = oldPerspective;
             }
