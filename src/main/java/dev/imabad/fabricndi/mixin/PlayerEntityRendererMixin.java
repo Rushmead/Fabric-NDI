@@ -29,7 +29,7 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
         if(abstractClientPlayerEntity instanceof CameraEntity){
             playerEntityModel.setVisible(false);
             playerEntityModel.head.visible = true;
-            playerEntityModel.isSneaking = false;
+            playerEntityModel.sneaking = false;
             playerEntityModel.helmet.visible = true;
             callbackInfo.cancel();
         }

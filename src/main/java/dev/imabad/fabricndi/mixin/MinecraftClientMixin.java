@@ -36,8 +36,6 @@ public abstract class MinecraftClientMixin implements MinecraftClientExt {
 
     @Shadow @Final public File runDirectory;
 
-    @Shadow private boolean isIntegratedServerRunning;
-
     @Shadow private IntegratedServer server;
 
     @Shadow @Final private LevelStorage levelStorage;
@@ -45,6 +43,8 @@ public abstract class MinecraftClientMixin implements MinecraftClientExt {
     @Shadow public abstract ClientPlayNetworkHandler getNetworkHandler();
 
     @Shadow private boolean paused;
+
+    @Shadow public abstract boolean isIntegratedServerRunning();
 
     @Inject(method = "render(Z)V", at=@At("RETURN"))
     public void render(boolean tick, CallbackInfo info) {
@@ -58,11 +58,11 @@ public abstract class MinecraftClientMixin implements MinecraftClientExt {
 
     @Inject(method= "joinWorld(Lnet/minecraft/client/world/ClientWorld;)V", at=@At("RETURN"))
     public void joinWorld(ClientWorld clientWorld, CallbackInfo callbackInfo){
-        FabricNDI.instance.getCameraManager().load(runDirectory, isIntegratedServerRunning, server, levelStorage, clientWorld, this.getNetworkHandler());
+        FabricNDI.instance.getCameraManager().load(runDirectory, isIntegratedServerRunning(), server, levelStorage, clientWorld, this.getNetworkHandler());
     }
 
     @Inject(method= "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at=@At("HEAD"))
     public void disconnect(Screen screen, CallbackInfo ci){
-        FabricNDI.instance.getCameraManager().save(runDirectory, player, isIntegratedServerRunning, levelStorage, server);
+        FabricNDI.instance.getCameraManager().save(runDirectory, player, isIntegratedServerRunning(), levelStorage, server);
     }
 }

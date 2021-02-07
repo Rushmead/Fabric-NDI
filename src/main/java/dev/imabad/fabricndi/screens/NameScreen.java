@@ -22,7 +22,7 @@ public class NameScreen extends Screen {
 
     protected void init() {
         super.init();
-        this.client.keyboard.enableRepeatEvents(true);
+        this.client.keyboard.setRepeatEvents(true);
         int i = this.width / 2;
         int j = this.height / 2;
         this.nameField = new TextFieldWidget(this.textRenderer, i - 75, j - 10, 150, 20, new TranslatableText("container.repair"));
@@ -49,7 +49,7 @@ public class NameScreen extends Screen {
 
     public void removed() {
         super.removed();
-        this.client.keyboard.enableRepeatEvents(false);
+        this.client.keyboard.setRepeatEvents(false);
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {

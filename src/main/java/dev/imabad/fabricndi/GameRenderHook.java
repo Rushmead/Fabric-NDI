@@ -7,11 +7,13 @@ import dev.imabad.fabricndi.threads.NDIControlThread;
 import dev.imabad.fabricndi.threads.NDIThread;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.options.Perspective;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -30,6 +32,28 @@ public class GameRenderHook {
 
     public GameRenderHook(String senderName){
         mainSender = new DevolaySender(senderName);
+    }
+
+    public Vec3d getEyePos(Entity entity){
+        return entity.getPos().add(0, entity.getStandingEyeHeight(), 0);
+    }
+
+    public Vec3d getLastTickPos(Entity entity){
+        return new Vec3d(entity.prevX, entity.prevY, entity.prevZ);
+    }
+
+    public Vec3d getLastTickEyePos(Entity entity){
+        return getLastTickPos(entity).add(0, entity.getStandingEyeHeight(), 0);
+    }
+
+    public void updatePos(Entity entity, Vec3d newPos, Vec3d lastTickPos){
+        entity.setPos(newPos.x, newPos.y, newPos.z);
+        entity.lastRenderX = lastTickPos.x;
+        entity.lastRenderY = lastTickPos.y;
+        entity.lastRenderZ = lastTickPos.z;
+        entity.prevX = lastTickPos.x;
+        entity.prevY = lastTickPos.y;
+        entity.prevZ = lastTickPos.z;
     }
 
     public void render(Framebuffer framebuffer, Window window, PlayerEntity player, float tickDelta, boolean isPaused){
@@ -90,11 +114,14 @@ public class GameRenderHook {
             }
             if(needFrames.size() > 0){
                 MinecraftClient minecraftClient = MinecraftClient.getInstance();
+                if(minecraftClient.interactionManager == null){
+                    return;
+                }
                 boolean oldHudHidden = minecraftClient.options.hudHidden;
                 Entity oldCam = minecraftClient.cameraEntity;
-                int oldPerspective = minecraftClient.options.perspective;
+                Perspective perspective = minecraftClient.options.getPerspective();
                 minecraftClient.options.hudHidden = true;
-                minecraftClient.options.perspective = 0;
+                minecraftClient.options.setPerspective(Perspective.FIRST_PERSON);
                 Framebuffer oldWindow = minecraftClient.getFramebuffer();
                 float prevCameraY = CameraExt.from(minecraftClient.gameRenderer.getCamera()).getCameraY();
 
@@ -145,7 +172,7 @@ public class GameRenderHook {
                 minecraftClient.cameraEntity = oldCam;
 //                minecraftClient.gameRenderer.getCamera().updateEyeHeight();
                 minecraftClient.options.hudHidden = oldHudHidden;
-                minecraftClient.options.perspective = oldPerspective;
+                minecraftClient.options.setPerspective(perspective);
             }
         }
     }

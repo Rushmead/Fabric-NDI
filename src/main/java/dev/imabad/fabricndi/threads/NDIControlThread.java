@@ -57,7 +57,7 @@ public class NDIControlThread extends Thread {
                 continue;
             }
             DevolayMetadataFrame metadataFrame = new DevolayMetadataFrame();
-            if (sender.get().sendCapture(metadataFrame, 100) == DevolayFrameType.METADATA) {
+            if (sender.get().receiveCapture(metadataFrame, 100) == DevolayFrameType.METADATA) {
                 try {
                     Document doc = db.parse(new InputSource(new StringReader(metadataFrame.getData())));
                     String type = doc.getFirstChild().getNodeName();
